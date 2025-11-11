@@ -9,8 +9,9 @@ fn main() {
     hasher.update(b"genesis");
     let genesis = hasher.finalize();
     println!("Genesis hash: {:x}", genesis);
-    let block = Block::new(format!("{:x}", genesis), 101010101, result);
-    println!("{:?}", block)
+    let mut block = Block::new(format!("{:x}", genesis), result);
+    println!("{:?}", block);
+    block.mine_block();
 }
 
 fn simulate_transactions() -> Vec<Transaction>{
