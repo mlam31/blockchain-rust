@@ -1,10 +1,16 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 mod blockchain;
 use blockchain::{Block, Transaction};
+use sha2::{Sha256, Digest};
 
 fn main() {
     let result = simulate_transactions();
-    println!("{:?}", result)
+    //println!("{:?}", result);
+    let mut hasher = Sha256::new();
+    hasher.update(b"genesis");
+    let genesis = hasher.finalize();
+    println!("Genesis hash: {:x}", genesis);
+    let block = Block::new(format!("{:x}", genesis), 101010101, result);
+    println!("{:?}", block)
 }
 
 fn simulate_transactions() -> Vec<Transaction>{
