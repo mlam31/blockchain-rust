@@ -11,7 +11,7 @@ static BLOCK_COUNTER: AtomicU64 = AtomicU64::new(1);
 
 #[derive(serde::Serialize, Deserialize, Debug, Clone)]
 pub struct Block {
-    #[serde(skip_serializing)]
+    #[serde(default)]
     pub hash: String,
     pub previous_hash: String,
     pub nonce: u64,
@@ -43,9 +43,13 @@ impl Block {
 
     pub fn calculate_hash(&self) -> String {
         let mut hasher = Sha256::new();
-        let data = serde_json::to_string(self).unwrap();
+        // clone to calculate hash without hash field
+        let mut tmp = self.clone();
+        tmp.hash = String::new();
+        let data = serde_json::to_string(&tmp).unwrap();
         hasher.update(data);
-        format!("{:x}", hasher.finalize())
+        let hash_tmp = format!("{:x}", hasher.finalize());
+        hash_tmp
     }
 
     pub fn mine_block(&mut self) {
@@ -88,20 +92,20 @@ pub fn initialize_blockchain() {
 }
 
 pub fn initialize_genesis_block() {
-    // Create Genesis block
-    let mut transaction_pool: Vec<Transaction> = Vec::new();
-    transaction_pool.push(Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string()));
-    let mut hasher = Sha256::new();
-    hasher.update("genesis");
-    let genesis_hash = format!("{:x}", hasher.finalize());
-    let mut genesis_block = Block::new(genesis_hash, transaction_pool);
-    genesis_block.mine_block();
-    println!("Genesis block:{:?}", genesis_block);
-
     // Add Genesis block onto the the blockchain as the 1st block
     let blockchain_data = fs::read_to_string("./src/blockchain.json").unwrap();
     let mut blocks: Vec<Block> = serde_json::from_str(&blockchain_data).unwrap();
     if blocks.is_empty() {
+        // Create Genesis block
+        let mut transaction_pool: Vec<Transaction> = Vec::new();
+        transaction_pool.push(Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string()));
+        let mut hasher = Sha256::new();
+        hasher.update("genesis");
+        let genesis_hash = format!("{:x}", hasher.finalize());
+        let mut genesis_block = Block::new(genesis_hash, transaction_pool);
+        genesis_block.mine_block();
+        println!("Genesis block:{:?}", genesis_block);
+
         blocks.push(genesis_block);
         fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blocks).unwrap()).unwrap();
         println!("Genesis block added to the blockchain !")
