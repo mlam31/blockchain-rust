@@ -1,17 +1,11 @@
 mod blockchain;
-use blockchain::{Block, Transaction};
+use blockchain::{Block, Transaction, initialize_blockchain};
 use sha2::{Sha256, Digest};
+use crate::blockchain::initialize_genesis_block;
 
 fn main() {
-    let result = simulate_transactions();
-    //println!("{:?}", result);
-    let mut hasher = Sha256::new();
-    hasher.update(b"genesis");
-    let genesis = hasher.finalize();
-    println!("Genesis hash: {:x}", genesis);
-    let mut block = Block::new(format!("{:x}", genesis), result);
-    println!("{:?}", block);
-    block.mine_block();
+    initialize_blockchain();
+    initialize_genesis_block();
 }
 
 fn simulate_transactions() -> Vec<Transaction>{

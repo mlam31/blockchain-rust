@@ -1,8 +1,10 @@
 use serde::{Serialize, Deserialize};
+use serde_json;
 use std::sync::atomic::{AtomicU64, Ordering};
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
 use rand;
+use std::fs;
 
 static TRANSACTION_COUNTER: AtomicU64 = AtomicU64::new(1);
 static BLOCK_COUNTER: AtomicU64 = AtomicU64::new(1);
@@ -76,4 +78,33 @@ impl Transaction {
         let id = TRANSACTION_COUNTER.fetch_add(1, Ordering::SeqCst);
         Transaction { sender, amount, receiver, transaction_id: id }
     }
+}
+
+pub fn initialize_blockchain() {
+    let data = fs::read_to_string("./src/blockchain.json").unwrap();
+    if data.trim().is_empty() {
+        fs::write("./src/blockchain.json", "[]").unwrap();
+    }
+}
+
+pub fn initialize_genesis_block() {
+    // Create Genesis block
+    let mut transaction_pool: Vec<Transaction> = Vec::new();
+    transaction_pool.push(Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string()));
+    let mut hasher = Sha256::new();
+    hasher.update("genesis");
+    let genesis_hash = format!("{:x}", hasher.finalize());
+    let mut genesis_block = Block::new(genesis_hash, transaction_pool);
+    genesis_block.mine_block();
+    println!("Genesis block:{:?}", genesis_block);
+
+    // Add Genesis block onto the the blockchain as the 1st block
+    let blockchain_data = fs::read_to_string("./src/blockchain.json").unwrap();
+    let mut blocks: Vec<Block> = serde_json::from_str(&blockchain_data).unwrap();
+    if blocks.is_empty() {
+        blocks.push(genesis_block);
+        fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blocks).unwrap()).unwrap();
+        println!("Genesis block added to the blockchain !")
+    }
+
 }
