@@ -53,6 +53,8 @@ impl Block {
     }
 
     pub fn mine_block(&mut self) {
+        let blockchain_data = fs::read_to_string("./src/blockchain.json").unwrap();
+        let mut blocks: Vec<Block> = serde_json::from_str(&blockchain_data).unwrap();
         let mut new_nonce = 0;
         loop {
             self.nonce = new_nonce;
@@ -65,6 +67,8 @@ impl Block {
                 println!("Trying new nonce: {}", new_nonce)
             }
         }
+        blocks.push(self.clone());
+        fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blocks).unwrap()).unwrap();
         println!("New hash: {}\nBlock mined ! ", self.hash)
     }
 }
@@ -107,7 +111,7 @@ pub fn initialize_genesis_block() {
         println!("Genesis block:{:?}", genesis_block);
 
         blocks.push(genesis_block);
-        fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blocks).unwrap()).unwrap();
+        
         println!("Genesis block added to the blockchain !")
     }
 
