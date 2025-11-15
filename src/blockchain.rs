@@ -1,9 +1,9 @@
 use serde::{Serialize, Deserialize};
 use serde_json;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{path, sync::atomic::{AtomicU64, Ordering}};
 use sha2::{Digest, Sha256, digest::core_api::BlockSizeUser};
 use time::OffsetDateTime;
-use rand;
+use rand::{self, rand_core::block};
 use std::fs;
 
 static TRANSACTION_COUNTER: AtomicU64 = AtomicU64::new(1);
@@ -78,7 +78,7 @@ impl Block {
             }
         }
         blockchain.blocks.push(self.clone());
-        fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blockchain.blocks).unwrap()).unwrap();
+        blockchain.save().unwrap();
         println!("New hash: {}\nBlock added to the blockchain:{:#?} ! ", self.hash, self)
     }
 }
@@ -122,5 +122,19 @@ impl Blockchain {
         let blocks: Vec<Block> = serde_json::from_str(&data).unwrap();
         let mem_pool: Vec<Transaction> = Vec::new();
         Blockchain{blocks, mem_pool}
+    }
+
+    pub fn save(&self) -> Result<(), std::io::Error>{
+        let path = "./src/blockchain.json";
+        fs::write(path, serde_json::to_string_pretty(&self.blocks).unwrap())
+    }
+
+    pub fn get_previous_hash(&self) -> Result<String, std::io::Error> {
+        if let Some(previous_block) = self.blocks.last().cloned() {
+            let previous_hash = previous_block.hash;
+            Ok(previous_hash)
+        } else {
+            Err(std::io::Error::new(std::io::ErrorKind::Other, "No previous block detected"))
+        }
     }
 }

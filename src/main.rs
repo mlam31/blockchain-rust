@@ -14,8 +14,7 @@ fn main() {
     loop {
         let transactions = std::mem::take(&mut blockchain.mem_pool);
         if transactions.len() == 10 {
-            let previous_block = blockchain.blocks.last().unwrap().clone();
-            let previous_hash = previous_block.hash;
+            let previous_hash = blockchain.get_previous_hash().unwrap();
             Block::new(previous_hash, transactions);
             
         }
