@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use serde_json;
 use std::sync::atomic::{AtomicU64, Ordering};
-use sha2::{Digest, Sha256};
+use sha2::{Digest, Sha256, digest::core_api::BlockSizeUser};
 use time::OffsetDateTime;
 use rand;
 use std::fs;
@@ -64,9 +64,7 @@ impl Block {
         hash_tmp
     }
 
-    pub fn mine_block(&mut self) {
-        let blockchain_data = fs::read_to_string("./src/blockchain.json").unwrap();
-        let mut blocks: Vec<Block> = serde_json::from_str(&blockchain_data).unwrap();
+    pub fn mine_block(&mut self, mut blockchain: Blockchain) {
         let mut new_nonce = 0;
         loop {
             self.nonce = new_nonce;
@@ -79,8 +77,8 @@ impl Block {
                 println!("Trying new nonce: {}", new_nonce)
             }
         }
-        blocks.push(self.clone());
-        fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blocks).unwrap()).unwrap();
+        blockchain.blocks.push(self.clone());
+        fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blockchain.blocks).unwrap()).unwrap();
         println!("New hash: {}\nBlock mined ! ", self.hash)
     }
 }
@@ -100,9 +98,9 @@ pub fn initialize_blockchain() {
     }
 }
 
-pub fn initialize_genesis_block(mut blocks: Vec<Block>) {
+pub fn initialize_genesis_block(blockchain: Blockchain) {
     // Add Genesis block onto the the blockchain as the 1st block
-    if blocks.is_empty() {
+    if blockchain.blocks.is_empty() {
         // Create Genesis block
         let mut transaction_pool: Vec<Transaction> = Vec::new();
         // Genesis transaction
@@ -111,11 +109,8 @@ pub fn initialize_genesis_block(mut blocks: Vec<Block>) {
         hasher.update("genesis");
         let genesis_hash = format!("{:x}", hasher.finalize());
         let mut genesis_block = Block::new(genesis_hash, transaction_pool);
-        genesis_block.mine_block();
+        genesis_block.mine_block(blockchain);
         println!("Genesis block:{:?}", genesis_block);
-
-        blocks.push(genesis_block);
-        
         println!("Genesis block added to the blockchain !")
     }
 
