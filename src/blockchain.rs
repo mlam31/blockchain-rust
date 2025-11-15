@@ -27,7 +27,7 @@ pub struct Transaction {
     pub receiver: String,
     pub transaction_id: u64,
 }
-
+#[derive(Clone)]
 pub struct Blockchain {
     pub blocks: Vec<Block>,
     pub mem_pool: Vec<Transaction>
@@ -79,7 +79,7 @@ impl Block {
         }
         blockchain.blocks.push(self.clone());
         fs::write("./src/blockchain.json", serde_json::to_string_pretty(&blockchain.blocks).unwrap()).unwrap();
-        println!("New hash: {}\nBlock mined ! ", self.hash)
+        println!("New hash: {}\nBlock added to the blockchain:{:#?} ! ", self.hash, self)
     }
 }
 
