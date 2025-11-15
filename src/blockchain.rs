@@ -20,6 +20,18 @@ pub struct Block {
     pub transaction_counter: u64,
     pub block_id: u64
 }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Transaction {
+    pub sender: String,
+    pub amount: f64,
+    pub receiver: String,
+    pub transaction_id: u64,
+}
+
+pub struct Blockchain {
+    pub blocks: Vec<Block>,
+    pub mem_pool: Vec<Transaction>
+}
 
 impl Block {
     pub fn new(previous_hash: String, transactions: Vec<Transaction>) -> Self {
@@ -73,13 +85,6 @@ impl Block {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Transaction {
-    pub sender: String,
-    pub amount: f64,
-    pub receiver: String,
-    pub transaction_id: u64,
-}
 
 impl Transaction {
     pub fn new(sender: String, amount: f64, receiver: String) -> Self {
@@ -95,13 +100,12 @@ pub fn initialize_blockchain() {
     }
 }
 
-pub fn initialize_genesis_block() {
+pub fn initialize_genesis_block(mut blocks: Vec<Block>) {
     // Add Genesis block onto the the blockchain as the 1st block
-    let blockchain_data = fs::read_to_string("./src/blockchain.json").unwrap();
-    let mut blocks: Vec<Block> = serde_json::from_str(&blockchain_data).unwrap();
     if blocks.is_empty() {
         // Create Genesis block
         let mut transaction_pool: Vec<Transaction> = Vec::new();
+        // Genesis transaction
         transaction_pool.push(Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string()));
         let mut hasher = Sha256::new();
         hasher.update("genesis");
@@ -115,4 +119,13 @@ pub fn initialize_genesis_block() {
         println!("Genesis block added to the blockchain !")
     }
 
+}
+
+impl Blockchain {
+    pub fn new() -> Self {
+        let data = fs::read_to_string("./src/blockchain.json").unwrap();
+        let blocks: Vec<Block> = serde_json::from_str(&data).unwrap();
+        let mem_pool: Vec<Transaction> = Vec::new();
+        Blockchain{blocks, mem_pool}
+    }
 }
