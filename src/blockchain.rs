@@ -37,11 +37,12 @@ pub struct TransactionPool {
 }
 
 impl Block {
-    pub fn new(previous_hash: String, transactions: Vec<Transaction>) -> Self {
+    pub fn new(transactions: Vec<Transaction>, blockchain: Blockchain) -> Self {
         let timestamp = OffsetDateTime::now_utc().unix_timestamp();
         let transaction_counter = transactions.len() as u64;
         let id = BLOCK_COUNTER.fetch_add(1, Ordering::SeqCst);
         let nonce = rand::random::<u64>();
+        let previous_hash = blockchain.get_previous_hash();
         
         let mut block = Block {
             hash: String::new(),
@@ -113,12 +114,9 @@ impl Blockchain {
     pub fn genesis_block(self) {
         if self.blocks.is_empty(){
             let mut genesis_tp = TransactionPool::new();
-            let mut hasher = Sha256::new();
-            hasher.update("genesis");
-            let genesis_hash = format!("{:x}", hasher.finalize());
             let genesis_transaction = Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string());
             genesis_tp.add(genesis_transaction);
-            let mut genesis_block = Block::new(genesis_hash, genesis_tp.transaction_pool);
+            let mut genesis_block = Block::new(genesis_tp.transaction_pool, self.clone());
             genesis_block.mine_block(self);
             println!("Genesis block: \n{:#?} \n", genesis_block);
             println!("Genesis block added to the blockchain !\n")
@@ -130,12 +128,15 @@ impl Blockchain {
         fs::write(path, serde_json::to_string_pretty(&self.blocks).unwrap())
     }
 
-    pub fn get_previous_hash(&self) -> Result<String, std::io::Error> {
+    pub fn get_previous_hash(&self) -> String {
+        let mut hasher = Sha256::new();
+        hasher.update("genesis");
+        let genesis_hash = format!("{:x}", hasher.finalize());
         if let Some(previous_block) = self.blocks.last().cloned() {
             let previous_hash = previous_block.hash;
-            Ok(previous_hash)
+            previous_hash
         } else {
-            Err(std::io::Error::new(std::io::ErrorKind::Other, "No previous block detected"))
+            genesis_hash
         }
     }
 }
