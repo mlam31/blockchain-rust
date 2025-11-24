@@ -68,7 +68,7 @@ impl Block {
         hash_tmp
     }
 
-    pub fn mine_block(&mut self, mut blockchain: Blockchain) {
+    pub fn mine_block(&mut self, blockchain: &mut Blockchain) {
         let mut new_nonce = 0;
         loop {
             self.nonce = new_nonce;
@@ -111,7 +111,7 @@ impl Blockchain {
         Blockchain{blocks}
     }
 
-    pub fn genesis_block(self) {
+    pub fn genesis_block(&mut self) {
         if self.blocks.is_empty(){
             let mut genesis_tp = TransactionPool::new();
             let genesis_transaction = Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string());

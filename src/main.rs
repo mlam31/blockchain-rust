@@ -5,7 +5,7 @@ mod args;
 use clap::Parser;
 
 fn main() {
-    let blockchain = Blockchain::new();
+    let mut blockchain = Blockchain::new();
     let mut tp: TransactionPool = TransactionPool::new();
     blockchain.clone().genesis_block();
     let args = BlockchainArgs::parse();
