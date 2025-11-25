@@ -3,7 +3,7 @@ use serde_json;
 use std::{sync::atomic::{AtomicU64, Ordering}};
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
-use rand::{self, rand_core::block};
+use rand;
 use std::fs;
 use std::path::Path;
 
@@ -36,7 +36,8 @@ pub struct Blockchain {
 }
 #[derive(Debug, Clone)]
 pub struct TransactionPool {
-    pub transaction_pool: Vec<Transaction>
+    pub pool: Vec<Transaction>,
+    pub path: String,
 }
 
 impl Block {
@@ -125,14 +126,14 @@ impl Blockchain {
         if data.trim().is_empty() {
             fs::write(self.path.clone(), "[]").unwrap();
         }
-}
+    }
 
     pub fn genesis_block(&mut self) {
         if self.blocks.is_empty(){
-            let mut genesis_tp = TransactionPool::new();
+            let mut genesis_tp = TransactionPool::new("./src/genesis_tp".to_string());
             let genesis_transaction = Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string());
             genesis_tp.add(genesis_transaction);
-            let mut genesis_block = Block::new(genesis_tp.transaction_pool, self.clone());
+            let mut genesis_block = Block::new(genesis_tp.pool, self.clone());
             genesis_block.mine_block(self);
             println!("Genesis block: \n{:#?} \n", genesis_block);
             println!("Genesis block added to the blockchain !\n")
@@ -158,16 +159,36 @@ impl Blockchain {
 }
 
 impl TransactionPool {
-    pub fn new() -> Self {
-        let transaction_pool: Vec<Transaction> = Vec::new();
-        TransactionPool { transaction_pool }
+    pub fn new(file_path: String) -> Self {
+        let vec_transactions: Vec<Transaction> = Vec::new();
+        let mut transaction_pool = TransactionPool {
+            pool: vec_transactions,
+            path: file_path.clone(),
+        };
+        transaction_pool.initialize_tp();
+        let data = fs::read_to_string(file_path).unwrap();
+        transaction_pool.pool = serde_json::from_str(&data).unwrap();
+        transaction_pool
+    }
+
+    pub fn initialize_tp(&self) {
+        if Path::new(&self.path).exists() {
+            println!("The file already exists");
+        } else {
+            fs::File::create(self.path.clone()).unwrap();
+        }
+        let data: String = fs::read_to_string(self.path.clone()).unwrap();
+        if data.trim().is_empty(){
+            fs::write(self.path.clone(),"[]").unwrap();
+        }
+
     }
 
     pub fn add(&mut self, transaction: Transaction) {
-        self.transaction_pool.push(transaction)
+        self.pool.push(transaction)
     }
 
     pub fn clear_pool(&mut self) {
-        self.transaction_pool.clear()
+        self.pool.clear()
     }
 }
