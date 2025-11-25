@@ -141,8 +141,7 @@ impl Blockchain {
     }
 
     pub fn save(&self) -> Result<(), std::io::Error>{
-        let path = "./src/blockchain.json";
-        fs::write(path, serde_json::to_string_pretty(&self.blocks).unwrap())
+        fs::write(self.path.clone(), serde_json::to_string_pretty(&self.blocks).unwrap())
     }
 
     pub fn get_previous_hash(&self) -> String {
@@ -184,8 +183,13 @@ impl TransactionPool {
 
     }
 
+    pub fn save(&self) -> Result<(), std::io::Error>{
+        fs::write(self.path.clone(), serde_json::to_string_pretty(&self.pool).unwrap())
+    }
+
     pub fn add(&mut self, transaction: Transaction) {
-        self.pool.push(transaction)
+        self.pool.push(transaction);
+        self.save().unwrap();
     }
 
     pub fn clear_pool(&mut self) {

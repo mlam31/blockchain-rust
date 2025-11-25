@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "sender": "alice",
+    "amount": 50.0,
+    "receiver": "bob",
+    "transaction_id": 1
+  }
+]
