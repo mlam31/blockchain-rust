@@ -3,8 +3,10 @@ use serde_json;
 use std::{sync::atomic::{AtomicU64, Ordering}};
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
-use rand;
+use rand::{self, rand_core::block};
 use std::fs;
+use std::path::Path;
+
 
 static TRANSACTION_COUNTER: AtomicU64 = AtomicU64::new(1);
 static BLOCK_COUNTER: AtomicU64 = AtomicU64::new(1);
@@ -30,6 +32,7 @@ pub struct Transaction {
 #[derive(Clone)]
 pub struct Blockchain {
     pub blocks: Vec<Block>,
+    pub path: String,
 }
 #[derive(Debug, Clone)]
 pub struct TransactionPool {
@@ -95,21 +98,34 @@ impl Transaction {
     }
 }
 
-pub fn initialize_blockchain() {
-    let data = fs::read_to_string("./src/blockchain.json").unwrap();
-    if data.trim().is_empty() {
-        fs::write("./src/blockchain.json", "[]").unwrap();
-    }
-}
+
 
 
 impl Blockchain {
-    pub fn new() -> Self {
-        initialize_blockchain();
-        let data = fs::read_to_string("./src/blockchain.json").unwrap();
-        let blocks: Vec<Block> = serde_json::from_str(&data).unwrap();
-        Blockchain{blocks}
+    pub fn new(file_path: String) -> Self {
+        let vec_blocks: Vec<Block> = Vec::new();
+        let mut blockchain = Blockchain {
+            blocks: vec_blocks,
+            path: file_path.clone(),
+        };
+        blockchain.initialize_blockchain();
+        let data = fs::read_to_string(file_path).unwrap();
+        blockchain.blocks = serde_json::from_str(&data).unwrap();
+        blockchain
     }
+
+    pub fn initialize_blockchain(&self) {
+        if Path::new(&self.path).exists(){
+            println!("The file already exists")
+        } else {
+            fs::File::create(self.path.clone()).unwrap();
+            println!("New file created")
+        }
+        let data = fs::read_to_string(self.path.clone()).unwrap();
+        if data.trim().is_empty() {
+            fs::write(self.path.clone(), "[]").unwrap();
+        }
+}
 
     pub fn genesis_block(&mut self) {
         if self.blocks.is_empty(){
