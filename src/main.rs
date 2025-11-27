@@ -9,5 +9,5 @@ fn main() {
     let mut tp: TransactionPool = TransactionPool::new("./src/tp.json".to_string());
     blockchain.clone().genesis_block();
     //let args = BlockchainArgs::parse();
-    tp.add(Transaction::new("alice".to_string(), 50.0, "bob".to_string()));
+    let t1 = Transaction::new("alice".to_string(), 50.0, "bob".to_string(), tp);
 }
