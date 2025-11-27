@@ -93,9 +93,8 @@ impl Block {
 
 
 impl Transaction {
-    pub fn new(sender: String, amount: f64, receiver: String, mut tp: TransactionPool) -> Self {
+    pub fn new(sender: String, amount: f64, receiver: String) -> Self {
         let id = TRANSACTION_COUNTER.fetch_add(1, Ordering::SeqCst);
-        tp.add(Transaction { sender: sender.clone(), amount, receiver: receiver.clone(), transaction_id: id });
         Transaction {sender, amount, receiver, transaction_id: id}
     }
 }
@@ -118,7 +117,6 @@ impl Blockchain {
 
     pub fn initialize_blockchain(&self) {
         if Path::new(&self.path).exists(){
-            println!("The file already exists")
         } else {
             fs::File::create(self.path.clone()).unwrap();
             println!("New file created")
@@ -132,7 +130,7 @@ impl Blockchain {
     pub fn genesis_block(&mut self) {
         if self.blocks.is_empty(){
             let genesis_tp = TransactionPool::new("./src/genesis_tp".to_string());
-            let genesis_transaction = Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string(), genesis_tp.clone());
+            let genesis_transaction = Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string());
             let mut genesis_block = Block::new(genesis_tp.pool, self.clone());
             genesis_block.mine_block(self);
             println!("Genesis block: \n{:#?} \n", genesis_block);
@@ -172,7 +170,6 @@ impl TransactionPool {
 
     pub fn initialize_tp(&self) {
         if Path::new(&self.path).exists() {
-            println!("The file already exists");
         } else {
             fs::File::create(self.path.clone()).unwrap();
         }

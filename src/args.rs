@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use crate::blockchain::{Block, Blockchain, Transaction, TransactionPool};
+use crate::{args, blockchain::{Block, Blockchain, Transaction, TransactionPool}};
 
 #[derive(Parser, Debug)]
 pub struct BlockchainArgs{
@@ -33,10 +33,15 @@ pub struct TransactionArgs {
     pub receiver: Option<String>,
     /// The amount 
     #[arg(short, long)]
-    pub amout: Option<f64>,
+    pub amount: Option<f64>,
+    /// The transaction pool
+    #[arg(short, long)]
+    pub tp: Option<String>
 }
 
-impl TransactionArgs {}
+impl TransactionArgs {
+
+}
 
 // Command for transaction: create
 // Commands for block: create, mine
