@@ -129,8 +129,9 @@ impl Blockchain {
 
     pub fn genesis_block(&mut self) {
         if self.blocks.is_empty(){
-            let genesis_tp = TransactionPool::new("./src/genesis_tp".to_string());
-            let genesis_transaction = Transaction::new("Bank".to_string(), 10000.0, "Mathieu".to_string());
+            let mut genesis_tp = TransactionPool::new("./src/genesis_tp".to_string());
+            let genesis_transaction = Transaction::new("Genesis".to_string(), 1.0, "Mathieu".to_string());
+            genesis_tp.add(genesis_transaction);
             let mut genesis_block = Block::new(genesis_tp.pool, self.clone());
             genesis_block.mine_block(self);
             println!("Genesis block: \n{:#?} \n", genesis_block);
@@ -192,5 +193,11 @@ impl TransactionPool {
     pub fn clear_pool(&mut self) {
         self.pool.clear();
         self.save().unwrap();
+    }
+
+    pub fn show(&self){
+        let data = fs::read_to_string(&self.path).unwrap();
+        let pool: Vec<Transaction> = serde_json::from_str(&data).unwrap();
+        println!("Transactions in the Transaction Pool : {:?}", pool);
     }
 }

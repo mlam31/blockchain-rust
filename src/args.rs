@@ -15,12 +15,22 @@ pub enum EntityType {
         #[command(subcommand)]
         command: TransactionCommand,
     },
-    TransactionPool
+    TransactionPool {
+        #[command(subcommand)]
+        command: TransactionPoolCommand,
+    },
 }
 
 #[derive(Subcommand, Debug)]
 pub enum TransactionCommand {
     Create(TransactionArgs)
+}
+
+#[derive(Subcommand, Debug)]
+pub enum  TransactionPoolCommand {
+    Show,
+    Status,
+    Clear,
 }
 
 #[derive(Parser, Debug)]
@@ -37,10 +47,6 @@ pub struct TransactionArgs {
     /// The transaction pool
     #[arg(short, long)]
     pub tp: Option<String>
-}
-
-impl TransactionArgs {
-
 }
 
 // Command for transaction: create

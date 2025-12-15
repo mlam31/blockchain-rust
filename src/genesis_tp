@@ -1,0 +1,8 @@
+[
+  {
+    "sender": "Genesis",
+    "amount": 1.0,
+    "receiver": "Mathieu",
+    "transaction_id": 1
+  }
+]
