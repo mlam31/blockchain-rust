@@ -27,17 +27,23 @@ fn main() {
         EntityType::TransactionPool  { command  }=> {
             match command {
                     TransactionPoolCommand::Show => {
-                        println!("------- Transactions in the pool -------");
                         if tp.pool.is_empty(){
                             println!("Transaction pool is empty")
                         } else {
+                            println!("------- Transactions in the pool -------");
                             for (i, tx) in tp.pool.iter().enumerate() {
                                 println!("[{}] {:?}", i+1, tx)
                             }
                         }
                     }
                     TransactionPoolCommand::Clear => {
-
+                        if tp.pool.is_empty(){
+                            println!("The pool is already empty")
+                        } else {
+                            tp.pool.clear();
+                            tp.save().unwrap();
+                            println!("The pool is cleared")
+                        }
                     }
                     TransactionPoolCommand::Status => {
 

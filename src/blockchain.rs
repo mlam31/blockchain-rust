@@ -178,7 +178,6 @@ impl TransactionPool {
         if data.trim().is_empty(){
             fs::write(self.path.clone(),"[]").unwrap();
         }
-
     }
 
     pub fn save(&self) -> Result<(), std::io::Error>{
@@ -188,16 +187,5 @@ impl TransactionPool {
     pub fn add(&mut self, transaction: Transaction) {
         self.pool.push(transaction);
         self.save().unwrap();
-    }
-
-    pub fn clear_pool(&mut self) {
-        self.pool.clear();
-        self.save().unwrap();
-    }
-
-    pub fn show(&self){
-        let data = fs::read_to_string(&self.path).unwrap();
-        let pool: Vec<Transaction> = serde_json::from_str(&data).unwrap();
-        println!("Transactions in the Transaction Pool : {:?}", pool);
     }
 }

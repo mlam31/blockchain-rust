@@ -1,74 +1,14 @@
 [
   {
     "sender": "Bank",
-    "amount": 1000.0,
+    "amount": 10000.0,
     "receiver": "Mathieu",
     "transaction_id": 1
   },
   {
     "sender": "Bank",
-    "amount": 100.0,
+    "amount": 10000.0,
     "receiver": "Mathieu",
     "transaction_id": 1
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 1
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 2
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 3
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 1
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 2
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 3
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 1
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 2
-  },
-  {
-    "sender": "Test",
-    "amount": 1.9,
-    "receiver": "Test2",
-    "transaction_id": 3
-  },
-  {
-    "sender": "Bank",
-    "amount": 100.0,
-    "receiver": "Mathieu",
-    "transaction_id": 4
   }
 ]
