@@ -7,8 +7,6 @@ use rand;
 use std::fs;
 use std::path::Path;
 
-
-static TRANSACTION_COUNTER: AtomicU64 = AtomicU64::new(1);
 static BLOCK_COUNTER: AtomicU64 = AtomicU64::new(1);
 
 #[derive(serde::Serialize, Deserialize, Debug, Clone)]
@@ -38,6 +36,7 @@ pub struct Blockchain {
 pub struct TransactionPool {
     pub pool: Vec<Transaction>,
     pub path: String,
+    pub next_transaction_id: u64,
 }
 
 impl Block {
@@ -93,9 +92,8 @@ impl Block {
 
 
 impl Transaction {
-    pub fn new(sender: String, amount: f64, receiver: String) -> Self {
-        let id = TRANSACTION_COUNTER.fetch_add(1, Ordering::SeqCst);
-        Transaction {sender, amount, receiver, transaction_id: id}
+    pub fn new(sender: String, amount: f64, receiver: String, transaction_id: u64) -> Self {
+        Transaction {sender, amount, receiver, transaction_id}
     }
 }
 
@@ -130,7 +128,7 @@ impl Blockchain {
     pub fn genesis_block(&mut self) {
         if self.blocks.is_empty(){
             let mut genesis_tp = TransactionPool::new("./src/genesis_tp".to_string());
-            let genesis_transaction = Transaction::new("Genesis".to_string(), 1.0, "Mathieu".to_string());
+            let genesis_transaction = Transaction::new("Genesis".to_string(), 1.0, "Mathieu".to_string(), 0);
             genesis_tp.add(genesis_transaction);
             let mut genesis_block = Block::new(genesis_tp.pool, self.clone());
             genesis_block.mine_block(self);
@@ -162,10 +160,14 @@ impl TransactionPool {
         let mut transaction_pool = TransactionPool {
             pool: vec_transactions,
             path: file_path.clone(),
+            next_transaction_id: 1
         };
         transaction_pool.initialize_tp();
         let data = fs::read_to_string(file_path).unwrap();
         transaction_pool.pool = serde_json::from_str(&data).unwrap();
+        if let Some(max_id) = transaction_pool.pool.iter().map(|tx| tx.transaction_id).max(){
+            transaction_pool.next_transaction_id = max_id + 1;
+        }
         transaction_pool
     }
 
@@ -185,7 +187,10 @@ impl TransactionPool {
     }
 
     pub fn add(&mut self, transaction: Transaction) {
-        self.pool.push(transaction);
+        let mut tx_to_add = transaction;
+        tx_to_add.transaction_id = self.next_transaction_id;
+        self.pool.push(tx_to_add);
+        self.next_transaction_id += 1;
         self.save().unwrap();
     }
 }

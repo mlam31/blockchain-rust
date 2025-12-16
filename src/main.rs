@@ -15,7 +15,7 @@ fn main() {
             match command {
                 TransactionCommand::Create(tx_args) => {
                     if let (Some(sender), Some(receiver), Some(amount)) = (tx_args.sender, tx_args.receiver, tx_args.amount) {
-                        let tx = Transaction::new(sender, amount, receiver);
+                        let tx = Transaction::new(sender, amount, receiver, 0);
                         tp.add(tx);
                         println!("Transaction added to the pool !")
                     } else {
