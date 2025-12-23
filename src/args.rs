@@ -9,7 +9,10 @@ pub struct BlockchainArgs{
 
 #[derive(Debug, Subcommand)]
 pub enum EntityType {
-    Block,
+    Block {
+        #[command(subcommand)]
+        command: BlockCommand,
+    },
     Blockchain,
     Transaction {
         #[command(subcommand)]
@@ -31,6 +34,12 @@ pub enum  TransactionPoolCommand {
     Show,
     Status,
     Clear,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum BlockCommand {
+    Create,
+    Mine,
 }
 
 #[derive(Parser, Debug)]

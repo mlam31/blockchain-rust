@@ -1,5 +1,5 @@
 mod blockchain;
-use crate::{args::{BlockchainArgs, EntityType, TransactionCommand, TransactionPoolCommand}, blockchain::Transaction};
+use crate::{args::{BlockCommand, BlockchainArgs, EntityType, TransactionCommand, TransactionPoolCommand}, blockchain::{Block, Transaction}};
 use blockchain::{Blockchain, TransactionPool};
 mod args;
 use clap::Parser;
@@ -48,6 +48,23 @@ fn main() {
                     TransactionPoolCommand::Status => {
 
                     }
+            }
+        }
+        EntityType::Block { command } => {
+            match command {
+                BlockCommand::Create => {
+                    if tp.pool.is_empty(){
+                        println!("Block can't be created if transaction pool is empty")
+                    } else {
+                        let bk = Block::new(tp.pool, blockchain);
+                        todo!("Implement block pool for block not mined yet")
+                    }
+                }
+                BlockCommand::Mine => {
+                    todo!("Implement block mining")
+                }
+                
+        
             }
         }
         _ => {}
