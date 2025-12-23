@@ -1,14 +1,1 @@
-[
-  {
-    "sender": "Unknow",
-    "amount": 1000.0,
-    "receiver": "Mathieu",
-    "transaction_id": 1
-  },
-  {
-    "sender": "Bank",
-    "amount": 1000.0,
-    "receiver": "Mathieu",
-    "transaction_id": 2
-  }
-]
+[]

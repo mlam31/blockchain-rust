@@ -1,13 +1,10 @@
 use serde::{Serialize, Deserialize};
 use serde_json;
-use std::{sync::atomic::{AtomicU64, Ordering}};
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
-use rand;
+use rand::{self};
 use std::fs;
 use std::path::Path;
-
-static BLOCK_COUNTER: AtomicU64 = AtomicU64::new(1);
 
 #[derive(serde::Serialize, Deserialize, Debug, Clone)]
 pub struct Block {
@@ -39,11 +36,17 @@ pub struct TransactionPool {
     pub next_transaction_id: u64,
 }
 
+#[derive(Debug, Clone)]
+pub struct BlockPool {
+    pub pool: Vec<Block>,
+    pub path: String,
+    pub next_block_id: u64,
+}
+
 impl Block {
-    pub fn new(transactions: Vec<Transaction>, blockchain: Blockchain) -> Self {
+    pub fn new(transactions: Vec<Transaction>, blockchain: Blockchain, block_id: u64) -> Self {
         let timestamp = OffsetDateTime::now_utc().unix_timestamp();
         let transaction_counter = transactions.len() as u64;
-        let id = BLOCK_COUNTER.fetch_add(1, Ordering::SeqCst);
         let nonce = rand::random::<u64>();
         let previous_hash = blockchain.get_previous_hash();
         
@@ -54,8 +57,9 @@ impl Block {
             timestamp,
             transactions,
             transaction_counter,
-            block_id: id
+            block_id
         };
+
         block.hash = block.calculate_hash();
         block
     }
@@ -130,7 +134,7 @@ impl Blockchain {
             let mut genesis_tp = TransactionPool::new("./src/genesis_tp".to_string());
             let genesis_transaction = Transaction::new("Genesis".to_string(), 1.0, "Mathieu".to_string(), 0);
             genesis_tp.add(genesis_transaction);
-            let mut genesis_block = Block::new(genesis_tp.pool, self.clone());
+            let mut genesis_block = Block::new(genesis_tp.pool, self.clone(), 0);
             genesis_block.mine_block(self);
             println!("Genesis block: \n{:#?} \n", genesis_block);
             println!("Genesis block added to the blockchain !\n")
@@ -191,6 +195,48 @@ impl TransactionPool {
         tx_to_add.transaction_id = self.next_transaction_id;
         self.pool.push(tx_to_add);
         self.next_transaction_id += 1;
+        self.save().unwrap();
+    }
+}
+
+impl BlockPool {
+    pub fn new(file_path: String) -> Self {
+        let vec_blocks: Vec<Block> = Vec::new();
+    let mut block_pool = BlockPool {
+        pool: vec_blocks,
+        path: file_path.clone(),
+        next_block_id: 1,
+    };
+    block_pool.initialize_bp();
+    let data = fs::read_to_string(file_path).unwrap();
+    block_pool.pool = serde_json::from_str(&data).unwrap();
+    if let Some(max_id) = block_pool.pool.iter().map(|bk| bk.block_id).max(){
+            block_pool.next_block_id = max_id + 1;
+        }
+    block_pool
+    }
+
+
+    pub fn initialize_bp(&self) {
+         if Path::new(&self.path).exists() {
+        } else {
+            fs::File::create(self.path.clone()).unwrap();
+        }
+        let data: String = fs::read_to_string(self.path.clone()).unwrap();
+        if data.trim().is_empty(){
+            fs::write(self.path.clone(),"[]").unwrap();
+        }
+    }
+
+    pub fn save(&self) -> Result<(), std::io::Error>{
+        fs::write(self.path.clone(), serde_json::to_string_pretty(&self.pool).unwrap())
+    }
+
+    pub fn add(&mut self, block: Block) {
+        let mut bk_to_add = block;
+        bk_to_add.block_id = self.next_block_id;
+        self.pool.push(bk_to_add);
+        self.next_block_id += 1;
         self.save().unwrap();
     }
 }

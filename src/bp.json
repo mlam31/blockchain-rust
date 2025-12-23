@@ -1,0 +1,24 @@
+[
+  {
+    "hash": "47cafbca1e8de35d4a0a19ff92887ea99d45b5f6ccd61922cc6d10be8c4cae0a",
+    "previous_hash": "000032f89413ef44fe0d51a6cbfc0395107f39171f8164f9685b583598377698",
+    "nonce": 3542312963008741852,
+    "timestamp": 1766496856,
+    "transactions": [
+      {
+        "sender": "Unknow",
+        "amount": 1000.0,
+        "receiver": "Mathieu",
+        "transaction_id": 1
+      },
+      {
+        "sender": "Bank",
+        "amount": 1000.0,
+        "receiver": "Mathieu",
+        "transaction_id": 2
+      }
+    ],
+    "transaction_counter": 2,
+    "block_id": 1
+  }
+]

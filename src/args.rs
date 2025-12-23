@@ -13,6 +13,10 @@ pub enum EntityType {
         #[command(subcommand)]
         command: BlockCommand,
     },
+    BlockPool {
+        #[command(subcommand)]
+        command: BlockPoolCommand,
+    },
     Blockchain,
     Transaction {
         #[command(subcommand)]
@@ -40,6 +44,11 @@ pub enum  TransactionPoolCommand {
 pub enum BlockCommand {
     Create,
     Mine,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum BlockPoolCommand {
+    Show,
 }
 
 #[derive(Parser, Debug)]
