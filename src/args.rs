@@ -43,7 +43,7 @@ pub enum  TransactionPoolCommand {
 #[derive(Subcommand, Debug)]
 pub enum BlockCommand {
     Create,
-    Mine,
+    Mine(BlockArg),
 }
 
 #[derive(Subcommand, Debug)]
@@ -65,6 +65,13 @@ pub struct TransactionArgs {
     /// The transaction pool
     #[arg(short, long)]
     pub tp: Option<String>
+}
+
+#[derive(Parser, Debug)]
+pub struct BlockArg {
+    /// block id present in the block pool
+    #[arg(short, long)]
+    pub id: Option<u64>,
 }
 
 // Command for transaction: create

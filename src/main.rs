@@ -67,8 +67,11 @@ fn main() {
                         println!("Block added to the pool");  
                     }
                 }
-                BlockCommand::Mine => {
-                    todo!("Implement block mining")
+                BlockCommand::Mine(bp_arg) => {
+                    if let Some(id) = bp_arg.id {
+                        todo!("Find the block with the same id => mine it and delete it from the block pool")
+                    }
+                    
                 } 
             }
         }
